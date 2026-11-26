@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Calculator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+    }
+    .calculator {
+      width: 100%;
+      max-width: 380px;
+      background: #1e293b;
+      border-radius: 26px;
+      padding: 22px;
+      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.4);
+    }
+    .screen {
+      background: #0f172a;
+      border-radius: 18px;
+      padding: 18px 16px;
+      margin-bottom: 18px;
+      text-align: right;
+      min-height: 112px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+    }
+    .expression {
+      min-height: 22px;
+      font-size: 0.95rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .display {
+      font-size: clamp(2.1rem, 9vw, 2.9rem);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    button {
+      border: none;
+      border-radius: 16px;
+      height: 64px;
+      font-size: 1.35rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #334155;
+      color: #f8fafc;
+      transition: transform 0.07s ease, filter 0.15s ease;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active {
+      transform: scale(0.95);
+      filter: brightness(1.15);
+    }
+    .utility { background: #475569; color: #e2e8f0; }
+    .operator { background: #f59e0b; color: #0f172a; }
+    .operator.active { background: #fde68a; color: #0f172a; }
+    .equals { background: #22c55e; color: #052e16; }
+    .zero { grid-column: span 2; }
+  </style>
+</head>
+<body>
+  <main class="calculator">
+    <div class="screen">
+      <div class="expression" id="expression"></div>
+      <div class="display" id="display">0</div>
+    </div>
+    <div class="keys">
+      <button class="utility" data-action="clear">AC</button>
+      <button class="utility" data-action="backspace">⌫</button>
+      <button class="utility" data-action="percent">%</button>
+      <button class="operator" data-operator="/">÷</button>
+
+      <button data-digit="7">7</button>
+      <button data-digit="8">8</button>
+      <button data-digit="9">9</button>
+      <button class="operator" data-operator="*">×</button>
+
+      <button data-digit="4">4</button>
+      <button data-digit="5">5</button>
+      <button data-digit="6">6</button>
+      <button class="operator" data-operator="-">−</button>
+
+      <button data-digit="1">1</button>
+      <button data-digit="2">2</button>
+      <button data-digit="3">3</button>
+      <button class="operator" data-operator="+">+</button>
+
+      <button class="zero" data-digit="0">0</button>
+      <button data-action="decimal">.</button>
+      <button class="equals" data-action="equals">=</button>
+    </div>
+  </main>
+
+  <script>
+    const displayEl = document.getElementById("display");
+    const expressionEl = document.getElementById("expression");
+    const operatorButtons = document.querySelectorAll("[data-operator]");
+
+    const symbols = { "+": "+", "-": "−", "*": "×", "/": "÷" };
+
+    let current = "0";
+    let previous = null;
+    let operator = null;
+    let waitingForSecond = false;
+    let justEvaluated = false;
+
+    function formatResult(num) {
+      if (!Number.isFinite(num)) return "Error";
+      return String(parseFloat(num.toPrecision(12)));
+    }
+
+    function updateUI() {
+      displayEl.textContent = current;
+      operatorButtons.forEach((btn) => {
+        btn.classList.toggle("active", waitingForSecond && btn.dataset.operator === operator);
+      });
+    }
+
+    function calculate(a, b, op) {
+      if (op === "+") return formatResult(a + b);
+      if (op === "-") return formatResult(a - b);
+      if (op === "*") return formatResult(a * b);
+      if (op === "/") return b === 0 ? "Error" : formatResult(a / b);
+      return String(b);
+    }
+
+    function clearAll() {
+      current = "0";
+      previous = null;
+      operator = null;
+      waitingForSecond = false;
+      justEvaluated = false;
+      expressionEl.textContent = "";
+      updateUI();
+    }
+
+    function inputDigit(digit) {
+      if (current === "Error" || justEvaluated) {
+        current = digit;
+        expressionEl.textContent = "";
+        justEvaluated = false;
+        waitingForSecond = false;
+      } else if (waitingForSecond) {
+        current = digit;
+        waitingForSecond = false;
+      } else {
+        current = current === "0" ? digit : current + digit;
+      }
+      updateUI();
+    }
+
+    function inputDecimal() {
+      if (current === "Error" || justEvaluated) {
+        current = "0.";
+        expressionEl.textContent = "";
+        justEvaluated = false;
+        waitingForSecond = false;
+      } else if (waitingForSecond) {
+        current = "0.";
+        waitingForSecond = false;
+      } else if (!current.includes(".")) {
+        current += ".";
+      }
+      updateUI();
+    }
+
+    function chooseOperator(nextOp) {
+      if (current === "Error") return;
+
+      if (operator && !waitingForSecond && previous !== null) {
+        const result = calculate(parseFloat(previous), parseFloat(current), operator);
+        current = result;
+        if (result === "Error") {
+          previous = null;
+          operator = null;
+          waitingForSecond = false;
+          expressionEl.textContent = "";
+          updateUI();
+          return;
+        }
+      }
+
+      previous = current;
+      operator = nextOp;
+      waitingForSecond = true;
+      justEvaluated = false;
+      expressionEl.textContent = `${previous} ${symbols[operator]}`;
+      updateUI();
+    }
+
+    function evaluate() {
+      if (!operator || previous === null || current === "Error") return;
+      const a = parseFloat(previous);
+      const b = parseFloat(current);
+      expressionEl.textContent = `${previous} ${symbols[operator]} ${current} =`;
+      current = calculate(a, b, operator);
+      previous = null;
+      operator = null;
+      waitingForSecond = false;
+      justEvaluated = true;
+      updateUI();
+    }
+
+    function applyPercent() {
+      if (current === "Error") return;
+      current = formatResult(parseFloat(current) / 100);
+      updateUI();
+    }
+
+    function backspace() {
+      if (current === "Error" || justEvaluated) {
+        clearAll();
+        return;
+      }
+      if (waitingForSecond) return;
+      current = current.length > 1 ? current.slice(0, -1) : "0";
+      if (current === "-") current = "0";
+      updateUI();
+    }
+
+    document.querySelector(".keys").addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      if (btn.dataset.digit) inputDigit(btn.dataset.digit);
+      else if (btn.dataset.operator) chooseOperator(btn.dataset.operator);
+      else if (btn.dataset.action === "decimal") inputDecimal();
+      else if (btn.dataset.action === "equals") evaluate();
+      else if (btn.dataset.action === "clear") clearAll();
+      else if (btn.dataset.action === "percent") applyPercent();
+      else if (btn.dataset.action === "backspace") backspace();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key >= "0" && e.key <= "9") inputDigit(e.key);
+      else if (["+", "-", "*", "/"].includes(e.key)) chooseOperator(e.key);
+      else if (e.key === ".") inputDecimal();
+      else if (e.key === "Enter" || e.key === "=") evaluate();
+      else if (e.key === "Backspace") backspace();
+      else if (e.key === "Escape") clearAll();
+      else if (e.key === "%") applyPercent();
+    });
+  </script>
+</body>
+</html>
