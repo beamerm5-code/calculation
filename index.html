@@ -55,42 +55,59 @@
       z-index: 1;
     }
 
-    /* Frosted Glass Display */
+    /* Glass Typing Box Container */
     .screen {
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.38));
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.68), rgba(15, 23, 42, 0.42));
       backdrop-filter: blur(12px) saturate(140%);
       -webkit-backdrop-filter: blur(12px) saturate(140%);
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-top-color: rgba(255, 255, 255, 0.34);
       border-radius: 20px;
-      padding: 18px 16px;
+      padding: 14px 16px;
       margin-bottom: 18px;
-      text-align: right;
-      min-height: 112px;
+      min-height: 104px;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
-      overflow: hidden;
+      justify-content: center;
       box-shadow:
         inset 0 1px 1px rgba(255, 255, 255, 0.28),
         0 10px 24px rgba(0, 0, 0, 0.28);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
-    .expression {
-      min-height: 22px;
-      font-size: 0.95rem;
-      color: #cbd5e1;
-      margin-bottom: 6px;
-      overflow-x: auto;
-      white-space: nowrap;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    .screen:focus-within {
+      border-color: rgba(125, 211, 252, 0.55);
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.32),
+        0 0 20px rgba(56, 189, 248, 0.2);
     }
-    .display {
-      font-size: clamp(2.1rem, 9vw, 2.9rem);
+
+    /* Typing Box where expressions and final answer appear */
+    #typingBox {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      text-align: right;
+      font-family: inherit;
+      font-size: clamp(2rem, 8.5vw, 2.7rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      overflow-x: auto;
-      white-space: nowrap;
+      letter-spacing: 0.03em;
+      caret-color: #38bdf8;
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+      transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), color 0.22s ease;
+    }
+    #typingBox::placeholder {
+      color: rgba(203, 213, 225, 0.45);
+    }
+    #typingBox.answer-flash {
+      animation: answerReveal 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes answerReveal {
+      0% { transform: translateY(4px) scale(0.97); opacity: 0.7; }
+      60% { transform: translateY(-1px) scale(1.02); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     .keys {
@@ -99,9 +116,10 @@
       gap: 12px;
     }
 
-    /* Glass Keys */
+    /* Glass Keys with Smooth Spring Press & Release */
     button {
       position: relative;
+      overflow: hidden;
       border-radius: 18px;
       height: 64px;
       font-size: 1.38rem;
@@ -123,21 +141,48 @@
         inset 0 1px 1px rgba(255, 255, 255, 0.45),
         inset 0 -2px 4px rgba(0, 0, 0, 0.18),
         0 8px 18px rgba(0, 0, 0, 0.28);
-      transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease;
+      transform: translateY(0) scale(1);
+      will-change: transform;
+      transition:
+        transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
       touch-action: manipulation;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    button:active {
-      transform: scale(0.95);
+
+    /* Smooth Depressed State */
+    button.pressed {
+      transform: translateY(2px) scale(0.92);
+      transition-duration: 0.09s;
       background: linear-gradient(
         145deg,
         rgba(255, 255, 255, 0.34) 0%,
         rgba(255, 255, 255, 0.14) 100%
       );
+      border-color: rgba(255, 255, 255, 0.52);
       box-shadow:
-        inset 0 2px 6px rgba(0, 0, 0, 0.25),
-        0 4px 10px rgba(0, 0, 0, 0.2);
+        inset 0 2px 7px rgba(0, 0, 0, 0.28),
+        0 2px 8px rgba(0, 0, 0, 0.22);
+    }
+
+    /* Soft Glass Ripple on Tap */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.48) 0%, rgba(255, 255, 255, 0) 72%);
+      transform: scale(0);
+      opacity: 0.9;
+      animation: glassRipple 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes glassRipple {
+      to {
+        transform: scale(2.6);
+        opacity: 0;
+      }
     }
 
     .utility {
@@ -158,15 +203,15 @@
       border-color: rgba(125, 211, 252, 0.38);
       border-top-color: rgba(186, 230, 253, 0.62);
     }
-    .operator.active {
+    .operator.pressed {
       background: linear-gradient(
         145deg,
-        rgba(125, 211, 252, 0.68) 0%,
-        rgba(56, 189, 248, 0.42) 100%
+        rgba(96, 185, 255, 0.62) 0%,
+        rgba(0, 102, 177, 0.36) 100%
       );
       box-shadow:
-        inset 0 1px 2px rgba(255, 255, 255, 0.65),
-        0 0 16px rgba(56, 189, 248, 0.45);
+        inset 0 2px 6px rgba(0, 0, 0, 0.24),
+        0 0 18px rgba(56, 189, 248, 0.38);
     }
 
     /* M-Red Tinted Glass Equals */
@@ -178,6 +223,16 @@
       );
       border-color: rgba(252, 165, 165, 0.42);
       border-top-color: rgba(254, 202, 202, 0.68);
+    }
+    .equals.pressed {
+      background: linear-gradient(
+        145deg,
+        rgba(248, 113, 113, 0.72) 0%,
+        rgba(220, 38, 38, 0.45) 100%
+      );
+      box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.26),
+        0 0 18px rgba(239, 68, 68, 0.42);
     }
 
     .zero { grid-column: span 2; }
@@ -199,21 +254,15 @@
         </radialGradient>
       </defs>
 
-      <!-- Outer Chrome Rim & Black Ring -->
       <circle cx="200" cy="200" r="196" fill="url(#bmwChrome)" />
       <circle cx="200" cy="200" r="186" fill="#09090b" />
-
-      <!-- Inner Chrome Ring & Quarters -->
       <circle cx="200" cy="200" r="128" fill="url(#bmwChrome)" />
       <circle cx="200" cy="200" r="122" fill="#f8fafc" />
       <path d="M 200 200 L 78 200 A 122 122 0 0 1 200 78 Z" fill="url(#bmwBlue)" />
       <path d="M 200 200 L 322 200 A 122 122 0 0 1 200 322 Z" fill="url(#bmwBlue)" />
-
-      <!-- Silver Cross Dividers -->
       <line x1="200" y1="78" x2="200" y2="322" stroke="#cbd5e1" stroke-width="3.5" />
       <line x1="78" y1="200" x2="322" y2="200" stroke="#cbd5e1" stroke-width="3.5" />
 
-      <!-- Radial BMW Lettering -->
       <g fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" text-anchor="middle">
         <text x="200" y="43" dy="0.35em" transform="rotate(-48 200 200)">B</text>
         <text x="200" y="43" dy="0.35em">M</text>
@@ -222,25 +271,32 @@
     </svg>
 
     <div class="screen">
-      <div class="expression" id="expression"></div>
-      <div class="display" id="display">0</div>
+      <input
+        id="typingBox"
+        type="text"
+        value=""
+        placeholder="0"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Calculator typing box"
+      />
     </div>
 
     <div class="keys">
       <button class="utility" data-action="clear">AC</button>
       <button class="utility" data-action="backspace">⌫</button>
       <button class="utility" data-action="percent">%</button>
-      <button class="operator" data-operator="/">÷</button>
+      <button class="operator" data-operator="÷">÷</button>
 
       <button data-digit="7">7</button>
       <button data-digit="8">8</button>
       <button data-digit="9">9</button>
-      <button class="operator" data-operator="*">×</button>
+      <button class="operator" data-operator="×">×</button>
 
       <button data-digit="4">4</button>
       <button data-digit="5">5</button>
       <button data-digit="6">6</button>
-      <button class="operator" data-operator="-">−</button>
+      <button class="operator" data-operator="−">−</button>
 
       <button data-digit="1">1</button>
       <button data-digit="2">2</button>
@@ -254,154 +310,313 @@
   </main>
 
   <script>
-    const displayEl = document.getElementById("display");
-    const expressionEl = document.getElementById("expression");
-    const operatorButtons = document.querySelectorAll("[data-operator]");
+    const typingBox = document.getElementById("typingBox");
+    const keysContainer = document.querySelector(".keys");
+    const operators = ["+", "−", "×", "÷", "-", "*", "/"];
 
-    const symbols = { "+": "+", "-": "−", "*": "×", "/": "÷" };
-
-    let current = "0";
-    let previous = null;
-    let operator = null;
-    let waitingForSecond = false;
     let justEvaluated = false;
 
-    function formatResult(num) {
-      if (!Number.isFinite(num)) return "Error";
-      return String(parseFloat(num.toPrecision(12)));
+    function scrollTypingBox() {
+      typingBox.scrollLeft = typingBox.scrollWidth;
     }
 
-    function updateUI() {
-      displayEl.textContent = current;
-      operatorButtons.forEach((btn) => {
-        btn.classList.toggle("active", waitingForSecond && btn.dataset.operator === operator);
-      });
+    function flashAnswer() {
+      typingBox.classList.remove("answer-flash");
+      void typingBox.offsetWidth;
+      typingBox.classList.add("answer-flash");
     }
 
-    function calculate(a, b, op) {
-      if (op === "+") return formatResult(a + b);
-      if (op === "-") return formatResult(a - b);
-      if (op === "*") return formatResult(a * b);
-      if (op === "/") return b === 0 ? "Error" : formatResult(a / b);
-      return String(b);
-    }
+    // Safe expression parser supporting +, -, *, /, %, decimals, parentheses, and BODMAS
+    function evaluateExpression(raw) {
+      const normalized = raw
+        .replace(/×/g, "*")
+        .replace(/÷/g, "/")
+        .replace(/−/g, "-")
+        .replace(/\s+/g, "");
 
-    function clearAll() {
-      current = "0";
-      previous = null;
-      operator = null;
-      waitingForSecond = false;
-      justEvaluated = false;
-      expressionEl.textContent = "";
-      updateUI();
-    }
-
-    function inputDigit(digit) {
-      if (current === "Error" || justEvaluated) {
-        current = digit;
-        expressionEl.textContent = "";
-        justEvaluated = false;
-        waitingForSecond = false;
-      } else if (waitingForSecond) {
-        current = digit;
-        waitingForSecond = false;
-      } else {
-        current = current === "0" ? digit : current + digit;
+      if (!normalized || !/^[0-9+\-*/.%()]+$/.test(normalized)) {
+        return null;
       }
-      updateUI();
-    }
 
-    function inputDecimal() {
-      if (current === "Error" || justEvaluated) {
-        current = "0.";
-        expressionEl.textContent = "";
-        justEvaluated = false;
-        waitingForSecond = false;
-      } else if (waitingForSecond) {
-        current = "0.";
-        waitingForSecond = false;
-      } else if (!current.includes(".")) {
-        current += ".";
+      let pos = 0;
+
+      function peek() {
+        return normalized[pos];
       }
-      updateUI();
-    }
 
-    function chooseOperator(nextOp) {
-      if (current === "Error") return;
-
-      if (operator && !waitingForSecond && previous !== null) {
-        const result = calculate(parseFloat(previous), parseFloat(current), operator);
-        current = result;
-        if (result === "Error") {
-          previous = null;
-          operator = null;
-          waitingForSecond = false;
-          expressionEl.textContent = "";
-          updateUI();
-          return;
+      function parseExpr() {
+        let value = parseTerm();
+        while (peek() === "+" || peek() === "-") {
+          const op = normalized[pos++];
+          const right = parseTerm();
+          value = op === "+" ? value + right : value - right;
         }
+        return value;
       }
 
-      previous = current;
-      operator = nextOp;
-      waitingForSecond = true;
+      function parseTerm() {
+        let value = parseUnary();
+        while (peek() === "*" || peek() === "/") {
+          const op = normalized[pos++];
+          const right = parseUnary();
+          value = op === "*" ? value * right : value / right;
+        }
+        return value;
+      }
+
+      function parseUnary() {
+        if (peek() === "+") {
+          pos++;
+          return parseUnary();
+        }
+        if (peek() === "-") {
+          pos++;
+          return -parseUnary();
+        }
+        return parsePostfix();
+      }
+
+      function parsePostfix() {
+        let value = parsePrimary();
+        while (peek() === "%") {
+          pos++;
+          value = value / 100;
+        }
+        return value;
+      }
+
+      function parsePrimary() {
+        if (peek() === "(") {
+          pos++;
+          const value = parseExpr();
+          if (peek() !== ")") throw new Error("Unmatched parenthesis");
+          pos++;
+          return value;
+        }
+
+        const start = pos;
+        let seenDot = false;
+        while (pos < normalized.length) {
+          const ch = normalized[pos];
+          if (ch >= "0" && ch <= "9") {
+            pos++;
+          } else if (ch === "." && !seenDot) {
+            seenDot = true;
+            pos++;
+          } else {
+            break;
+          }
+        }
+
+        if (start === pos || normalized.slice(start, pos) === ".") {
+          throw new Error("Invalid number");
+        }
+        return parseFloat(normalized.slice(start, pos));
+      }
+
+      try {
+        const result = parseExpr();
+        if (pos !== normalized.length || !Number.isFinite(result)) {
+          return "Error";
+        }
+        return String(parseFloat(result.toPrecision(12)));
+      } catch {
+        return "Error";
+      }
+    }
+
+    function appendDigit(digit) {
+      if (typingBox.value === "Error" || justEvaluated) {
+        typingBox.value = digit;
+        justEvaluated = false;
+      } else {
+        typingBox.value += digit;
+      }
+      scrollTypingBox();
+    }
+
+    function appendDecimal() {
+      if (typingBox.value === "Error" || justEvaluated) {
+        typingBox.value = "0.";
+        justEvaluated = false;
+        scrollTypingBox();
+        return;
+      }
+      const lastSegment = typingBox.value.split(/[+−×÷\-*/()]/).pop();
+      if (!lastSegment.includes(".")) {
+        typingBox.value += lastSegment === "" ? "0." : ".";
+      }
+      scrollTypingBox();
+    }
+
+    function appendOperator(op) {
+      if (typingBox.value === "Error") {
+        typingBox.value = "";
+      }
       justEvaluated = false;
-      expressionEl.textContent = `${previous} ${symbols[operator]}`;
-      updateUI();
+      const val = typingBox.value;
+
+      if (val === "") {
+        if (op === "−") typingBox.value = "−";
+        return;
+      }
+
+      const lastChar = val.slice(-1);
+      if (operators.includes(lastChar)) {
+        typingBox.value = val.slice(0, -1) + op;
+      } else {
+        typingBox.value += op;
+      }
+      scrollTypingBox();
     }
 
-    function evaluate() {
-      if (!operator || previous === null || current === "Error") return;
-      const a = parseFloat(previous);
-      const b = parseFloat(current);
-      expressionEl.textContent = `${previous} ${symbols[operator]} ${current} =`;
-      current = calculate(a, b, operator);
-      previous = null;
-      operator = null;
-      waitingForSecond = false;
-      justEvaluated = true;
-      updateUI();
-    }
-
-    function applyPercent() {
-      if (current === "Error") return;
-      current = formatResult(parseFloat(current) / 100);
-      updateUI();
+    function appendPercent() {
+      const val = typingBox.value;
+      if (!val || val === "Error") return;
+      const lastChar = val.slice(-1);
+      if (!operators.includes(lastChar)) {
+        typingBox.value += "%";
+        justEvaluated = false;
+        scrollTypingBox();
+      }
     }
 
     function backspace() {
-      if (current === "Error" || justEvaluated) {
-        clearAll();
-        return;
+      if (typingBox.value === "Error") {
+        typingBox.value = "";
+      } else {
+        typingBox.value = typingBox.value.slice(0, -1);
       }
-      if (waitingForSecond) return;
-      current = current.length > 1 ? current.slice(0, -1) : "0";
-      if (current === "-") current = "0";
-      updateUI();
+      justEvaluated = false;
+      scrollTypingBox();
     }
 
-    document.querySelector(".keys").addEventListener("click", (e) => {
+    function clearAll() {
+      typingBox.value = "";
+      justEvaluated = false;
+    }
+
+    function solve() {
+      const val = typingBox.value.trim();
+      if (!val || val === "Error") return;
+
+      // Ignore if ending with an unfinished operator
+      if (operators.includes(val.slice(-1))) return;
+
+      const result = evaluateExpression(val);
+      if (result !== null) {
+        typingBox.value = result;
+        justEvaluated = result !== "Error";
+        flashAnswer();
+        scrollTypingBox();
+      }
+    }
+
+    // Smooth press & glass ripple animation
+    function triggerRipple(btn, clientX, clientY) {
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      ripple.style.width = `${size}px`;
+      ripple.style.height = `${size}px`;
+
+      const x = clientX !== null ? clientX - rect.left - size / 2 : rect.width / 2 - size / 2;
+      const y = clientY !== null ? clientY - rect.top - size / 2 : rect.height / 2 - size / 2;
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 540);
+    }
+
+    keysContainer.addEventListener("pointerdown", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      btn.classList.add("pressed");
+      triggerRipple(btn, e.clientX, e.clientY);
+    });
+
+    function releasePressedButtons() {
+      document.querySelectorAll("button.pressed").forEach((btn) => {
+        btn.classList.remove("pressed");
+      });
+    }
+
+    window.addEventListener("pointerup", releasePressedButtons);
+    window.addEventListener("pointercancel", releasePressedButtons);
+    keysContainer.addEventListener("pointerleave", releasePressedButtons);
+
+    keysContainer.addEventListener("click", (e) => {
       const btn = e.target.closest("button");
       if (!btn) return;
 
-      if (btn.dataset.digit) inputDigit(btn.dataset.digit);
-      else if (btn.dataset.operator) chooseOperator(btn.dataset.operator);
-      else if (btn.dataset.action === "decimal") inputDecimal();
-      else if (btn.dataset.action === "equals") evaluate();
-      else if (btn.dataset.action === "clear") clearAll();
-      else if (btn.dataset.action === "percent") applyPercent();
+      if (btn.dataset.digit) appendDigit(btn.dataset.digit);
+      else if (btn.dataset.operator) appendOperator(btn.dataset.operator);
+      else if (btn.dataset.action === "decimal") appendDecimal();
+      else if (btn.dataset.action === "percent") appendPercent();
       else if (btn.dataset.action === "backspace") backspace();
+      else if (btn.dataset.action === "clear") clearAll();
+      else if (btn.dataset.action === "equals") solve();
     });
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key >= "0" && e.key <= "9") inputDigit(e.key);
-      else if (["+", "-", "*", "/"].includes(e.key)) chooseOperator(e.key);
-      else if (e.key === ".") inputDecimal();
-      else if (e.key === "Enter" || e.key === "=") evaluate();
-      else if (e.key === "Backspace") backspace();
-      else if (e.key === "Escape") clearAll();
-      else if (e.key === "%") applyPercent();
+    typingBox.addEventListener("input", () => {
+      justEvaluated = false;
     });
-  </script>
-</body>
-</html>
+
+    // Keyboard support with matching smooth button press animation
+    const keyMap = {
+      "*": '[data-operator="×"]',
+      "/": '[data-operator="÷"]',
+      "-": '[data-operator="−"]',
+      "+": '[data-operator="+"]',
+      ".": '[data-action="decimal"]',
+      "%": '[data-action="percent"]',
+      "Enter": '[data-action="equals"]',
+      "=": '[data-action="equals"]',
+      "Backspace": '[data-action="backspace"]',
+      "Escape": '[data-action="clear"]'
+    };
+
+    document.addEventListener("keydown", (e) => {
+      const isFocusedInBox = document.activeElement === typingBox;
+
+      const selector =
+        e.key >= "0" && e.key <= "9"
+          ? `[data-digit="${e.key}"]`
+          : keyMap[e.key];
+
+      if (selector) {
+        const matchedBtn = document.querySelector(selector);
+        if (matchedBtn) {
+          matchedBtn.classList.add("pressed");
+          triggerRipple(matchedBtn, null, null);
+          setTimeout(() => matchedBtn.classList.remove("pressed"), 140);
+        }
+      }
+
+      if (e.key === "Enter" || e.key === "=") {
+        e.preventDefault();
+        solve();
+        return;
+      }
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        clearAll();
+        return;
+      }
+
+      // Let normal typing work if the user tapped inside the typing box
+      if (isFocusedInBox) return;
+
+      if (e.key >= "0" && e.key <= "9") appendDigit(e.key);
+      else if (e.key === "+") appendOperator("+");
+      else if (e.key === "-") appendOperator("−");
+      else if (e.key === "*") appendOperator("×");
+      else if (e.key === "/") {
+        e.preventDefault();
+        appendOperator("÷");
+      } else if (e.key === ".") appendDecimal();
+      else if (e.key === "%") appendPercent();
+      else if (e.key === "Backspace") backspace();
