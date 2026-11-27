@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Calculator</title>
+  <title>BMW Glass Calculator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #090d16;
+      background: radial-gradient(circle at top, #17253d 0%, #070b14 68%);
       color: #f8fafc;
       min-height: 100dvh;
       display: flex;
@@ -23,35 +23,46 @@
       overflow: hidden;
       width: 100%;
       max-width: 380px;
-      background: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 26px;
+      background: rgba(12, 18, 30, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-top-color: rgba(255, 255, 255, 0.28);
+      border-radius: 28px;
       padding: 22px;
-      box-shadow: 0 24px 55px rgba(0, 0, 0, 0.55);
+      box-shadow:
+        0 28px 60px rgba(0, 0, 0, 0.65),
+        inset 0 1px 1px rgba(255, 255, 255, 0.22);
     }
-    /* 1/4th BMW Roundel positioned behind the calculator keys */
+
+    /* Centered BMW Logo behind the glass keys */
     .bmw-bg {
       position: absolute;
-      width: 440px;
-      height: 440px;
-      right: -185px;
-      bottom: -185px;
-      opacity: 0.42;
+      width: 78%;
+      max-width: 295px;
+      height: auto;
+      left: 50%;
+      top: 56%;
+      transform: translate(-50%, -50%);
+      opacity: 0.88;
+      filter: drop-shadow(0 0 28px rgba(0, 122, 217, 0.35));
       pointer-events: none;
       user-select: none;
       z-index: 0;
     }
+
     .screen,
     .keys {
       position: relative;
       z-index: 1;
     }
+
+    /* Frosted Glass Display */
     .screen {
-      background: rgba(9, 13, 22, 0.78);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.38));
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-top-color: rgba(255, 255, 255, 0.34);
+      border-radius: 20px;
       padding: 18px 16px;
       margin-bottom: 18px;
       text-align: right;
@@ -60,14 +71,18 @@
       flex-direction: column;
       justify-content: flex-end;
       overflow: hidden;
+      box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.28),
+        0 10px 24px rgba(0, 0, 0, 0.28);
     }
     .expression {
       min-height: 22px;
       font-size: 0.95rem;
-      color: #94a3b8;
+      color: #cbd5e1;
       margin-bottom: 6px;
       overflow-x: auto;
       white-space: nowrap;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
     }
     .display {
       font-size: clamp(2.1rem, 9vw, 2.9rem);
@@ -75,70 +90,118 @@
       font-variant-numeric: tabular-nums;
       overflow-x: auto;
       white-space: nowrap;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
     }
+
     .keys {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
     }
+
+    /* Glass Keys */
     button {
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 16px;
+      position: relative;
+      border-radius: 18px;
       height: 64px;
-      font-size: 1.35rem;
+      font-size: 1.38rem;
       font-weight: 600;
       cursor: pointer;
-      background: rgba(30, 41, 59, 0.68);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      color: #f8fafc;
-      transition: transform 0.07s ease, filter 0.15s ease;
+      color: #ffffff;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+      background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.06) 100%
+      );
+      backdrop-filter: blur(7px) saturate(145%);
+      -webkit-backdrop-filter: blur(7px) saturate(145%);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-top-color: rgba(255, 255, 255, 0.48);
+      border-left-color: rgba(255, 255, 255, 0.36);
+      box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.45),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.18),
+        0 8px 18px rgba(0, 0, 0, 0.28);
+      transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease;
       touch-action: manipulation;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
     button:active {
       transform: scale(0.95);
-      filter: brightness(1.18);
+      background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.34) 0%,
+        rgba(255, 255, 255, 0.14) 100%
+      );
+      box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.25),
+        0 4px 10px rgba(0, 0, 0, 0.2);
     }
+
     .utility {
-      background: rgba(71, 85, 105, 0.68);
-      color: #e2e8f0;
+      background: linear-gradient(
+        145deg,
+        rgba(226, 232, 240, 0.28) 0%,
+        rgba(148, 163, 184, 0.10) 100%
+      );
     }
+
+    /* BMW Blue Tinted Glass Operators */
     .operator {
-      background: rgba(0, 102, 177, 0.82);
-      color: #f8fafc;
+      background: linear-gradient(
+        145deg,
+        rgba(41, 151, 255, 0.42) 0%,
+        rgba(0, 85, 150, 0.22) 100%
+      );
+      border-color: rgba(125, 211, 252, 0.38);
+      border-top-color: rgba(186, 230, 253, 0.62);
     }
     .operator.active {
-      background: #60a5fa;
-      color: #090d16;
+      background: linear-gradient(
+        145deg,
+        rgba(125, 211, 252, 0.68) 0%,
+        rgba(56, 189, 248, 0.42) 100%
+      );
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.65),
+        0 0 16px rgba(56, 189, 248, 0.45);
     }
+
+    /* M-Red Tinted Glass Equals */
     .equals {
-      background: rgba(231, 34, 46, 0.88);
-      color: #ffffff;
+      background: linear-gradient(
+        145deg,
+        rgba(239, 68, 68, 0.56) 0%,
+        rgba(185, 28, 28, 0.30) 100%
+      );
+      border-color: rgba(252, 165, 165, 0.42);
+      border-top-color: rgba(254, 202, 202, 0.68);
     }
+
     .zero { grid-column: span 2; }
   </style>
 </head>
 <body>
   <main class="calculator">
-    <!-- Inline SVG BMW Roundel (1/4 visible in bottom-right corner) -->
+    <!-- Centered Inline SVG BMW Roundel -->
     <svg class="bmw-bg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
         <linearGradient id="bmwChrome" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#f1f5f9" />
+          <stop offset="0%" stop-color="#f8fafc" />
           <stop offset="50%" stop-color="#94a3b8" />
           <stop offset="100%" stop-color="#e2e8f0" />
         </linearGradient>
         <radialGradient id="bmwBlue" cx="35%" cy="35%" r="70%">
-          <stop offset="0%" stop-color="#2997ff" />
+          <stop offset="0%" stop-color="#38a6ff" />
           <stop offset="100%" stop-color="#005596" />
         </radialGradient>
       </defs>
 
       <!-- Outer Chrome Rim & Black Ring -->
       <circle cx="200" cy="200" r="196" fill="url(#bmwChrome)" />
-      <circle cx="200" cy="200" r="186" fill="#0a0a0a" />
+      <circle cx="200" cy="200" r="186" fill="#09090b" />
 
       <!-- Inner Chrome Ring & Quarters -->
       <circle cx="200" cy="200" r="128" fill="url(#bmwChrome)" />
